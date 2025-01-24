@@ -1,0 +1,45 @@
+name: 'kirick13/setup-k8s'
+description: 'Sets up kubectl and kustomize in GitHub Actions Workflows.'
+
+inputs:
+  kubectl-version:
+    description: 'Version of kubectl to install.'
+    required: true
+  kustomize-version:
+    description: 'Version of kustomize to install.'
+    required: true
+  kube-config-base64:
+    description: 'Base64-encoded kube config file.'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v4
+      with:
+        version: v${{ inputs.kubectl-version }}
+
+    - name: Set up cache for kustomize
+      uses: actions/cache@v3
+      with:
+        path: /usr/local/bin/kustomize
+        key: ${{ runner.os }}-kustomize-${{ inputs.kustomize-version }}
+        restore-keys: |
+          ${{ runner.os }}-kustomize-${{ inputs.kustomize-version }}
+
+    - name: Set up kustomize
+      run: |
+        if [ ! -f /usr/local/bin/kustomize ]; then
+          mkdir -p ${{ runner.temp }}/kustomize
+          cd ${{ runner.temp }}/kustomize
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- ${{ inputs.kustomize-version }}
+          sudo mv kustomize /usr/local/bin/
+        else
+          echo "Using cached kustomize..."
+        fi
+
+    - name: Set kube-config
+      run: |
+        mkdir ~/.kube || true
+        echo "${{ inputs.kube-config-base64 }}" | base64 -d > ~/.kube/config
