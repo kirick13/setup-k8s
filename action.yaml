@@ -21,7 +21,7 @@ runs:
         version: v${{ inputs.kubectl-version }}
 
     - name: Set up cache for kustomize
-      uses: actions/cache@v3
+      uses: actions/cache@v5
       with:
         path: /usr/local/bin/kustomize
         key: ${{ runner.os }}-kustomize-${{ inputs.kustomize-version }}
