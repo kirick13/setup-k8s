@@ -33,7 +33,7 @@ runs:
         if [ ! -f /usr/local/bin/kustomize ]; then
           mkdir -p ${{ runner.temp }}/kustomize
           cd ${{ runner.temp }}/kustomize
-          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- ${{ inputs.kustomize-version }}
+          GITHUB_TOKEN="" curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- ${{ inputs.kustomize-version }}
           sudo mv kustomize /usr/local/bin/
         else
           echo "Using cached kustomize..."
